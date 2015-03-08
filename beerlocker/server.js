@@ -21,6 +21,11 @@ app.use(bodyParser.urlencoded({
 // Use the passport package in our application
 app.use(passport.initialize());
 
+app.use(function (req, res, next) {
+    console.log('%s %s', req.method, req.url);
+    next();
+});
+
 // Create our Express router
 var router = express.Router();
 
@@ -41,8 +46,30 @@ router.route('/users')
     .post(userController.postUsers)
     .get(authController.isAuthenticated, userController.getUsers);
 
+
 // Register all our routes with /api
 app.use('/api', router);
+
+app.use(function (err, req, res, next) {
+    
+    console.error(err.stack);
+    
+    res.status(500).send(err);
+
+});
+
+//callback for json wrapping - just an example
+app.use(function (req, res, next) {
+    
+    if (res.jsonbody) {
+        console.log('%s', res.jsonbody);
+        res.json(res.jsonbody);
+    }
+    
+    
+    return next();
+});
+
 
 // Start the server
 app.listen(3000);
